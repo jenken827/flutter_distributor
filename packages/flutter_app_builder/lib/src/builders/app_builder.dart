@@ -1,8 +1,6 @@
 import 'dart:io';
-
-import 'package:flutter_app_builder/src/build_config.dart';
+import 'package:flutter_app_builder/flutter_app_builder.dart';
 import 'package:flutter_app_builder/src/build_error.dart';
-import 'package:flutter_app_builder/src/build_result.dart';
 import 'package:flutter_app_builder/src/commands/flutter.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -37,10 +35,19 @@ abstract class AppBuilder {
     Map<String, String>? environment,
   }) async {
     final time = Stopwatch()..start();
+    bool issetBuildName = false;
+    bool issetBuildNumber = false;
 
     BuildConfig config = BuildConfig(arguments: arguments);
     List<String> buildArguments = [];
+
     for (String key in config.arguments.keys) {
+      if (key == 'build-name') {
+        issetBuildName = true;
+      }
+      if (key == 'build-number') {
+        issetBuildNumber = true;
+      }
       dynamic value = config.arguments[key];
       if (value == null || value is bool) {
         buildArguments.add('--$key');
@@ -52,13 +59,12 @@ abstract class AppBuilder {
         buildArguments.addAll(['--$key', value]);
       }
     }
-
-    buildArguments.addAll([
-      '--dart-define',
-      'FLUTTER_BUILD_NAME=$appBuildName',
-      '--dart-define',
-      'FLUTTER_BUILD_NUMBER=$appBuildNumber',
-    ]);
+    if (!issetBuildNumber) {
+      buildArguments.addAll(['--build-number', appBuildNumber]);
+    }
+    if (!issetBuildName) {
+      buildArguments.addAll(['--build-name', appBuildName]);
+    }
 
     ProcessResult processResult = await flutter.withEnv(environment).build(
       [buildSubcommand, ...buildArguments],

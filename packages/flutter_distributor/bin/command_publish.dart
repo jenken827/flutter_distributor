@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:flutter_distributor/flutter_distributor.dart';
 import 'package:flutter_distributor/src/extensions/extensions.dart';
+import 'package:flutter_distributor/src/release_job.dart';
 
 /// Publish an application to a third party provider
 ///
@@ -25,6 +26,7 @@ class CommandPublish extends Command {
         'appstore',
         'fir',
         'firebase',
+        'gitee',
         'github',
         'playstore',
         'pgyer',
@@ -117,6 +119,30 @@ class CommandPublish extends Command {
     argParser.addSeparator('firebase-hosting');
     argParser.addOption('firebase-hosting-project-id', valueHelp: '');
 
+    // Gitee
+    argParser.addSeparator('gitee');
+    argParser.addOption(
+      'gitee-repo-owner',
+      valueHelp: '',
+      help: 'The name of the target Gitee repository owner (namespace)',
+    );
+    argParser.addOption(
+      'gitee-repo-name',
+      valueHelp: '',
+      help: 'The name of the target Gitee repository',
+    );
+    argParser.addOption(
+      'gitee-release-id',
+      valueHelp: '',
+      help: 'The id of the new release on Gitee',
+    );
+    argParser.addOption(
+      'gitee-release-sync-github',
+      valueHelp: 'true or false',
+      help:
+          'If true, will create a new release who\'s info is sync from github',
+    );
+
     // Github
     argParser.addSeparator('github');
 
@@ -161,7 +187,7 @@ class CommandPublish extends Command {
   String get name => 'publish';
 
   @override
-  String get description => 'Publish the current Flutter application';
+  String get description => 'Publish the current Flutter application.';
 
   @override
   Future run() async {
@@ -204,6 +230,10 @@ class CommandPublish extends Command {
       'firebase-groups': argResults?['firebase-groups'],
       'firebase-groups-file': argResults?['firebase-groups-file'],
       'firebase-hosting-project-id': argResults?['firebase-hosting-project-id'],
+      'gitee-repo-owner': argResults?['gitee-repo-owner'],
+      'gitee-repo-name': argResults?['gitee-repo-name'],
+      'gitee-release-id': argResults?['gitee-release-id'],
+      'gitee-release-sync-github': argResults?['gitee-release-sync-github'],
       'github-repo-owner': argResults?['github-repo-owner'],
       'github-repo-name': argResults?['github-repo-name'],
       'github-release-title': argResults?['github-release-title'],
@@ -221,10 +251,28 @@ class CommandPublish extends Command {
             ? Directory(path)
             : File(path);
 
+    // Convert targets and publishArguments to List<ReleaseJobPublish>
+    List<ReleaseJobPublish> publishJobs = targets.map((target) {
+      // Filter arguments to only include those for the current target
+      final targetArgs = publishArguments.entries
+          .where((entry) => entry.key.startsWith('$target-'))
+          .map(
+            (entry) => MapEntry(
+              entry.key.replaceFirst('$target-', ''),
+              entry.value as dynamic,
+            ),
+          )
+          .toList();
+
+      return ReleaseJobPublish(
+        target: target,
+        args: Map.fromEntries(targetArgs),
+      );
+    }).toList();
+
     return distributor.publish(
       fileSystemEntity,
-      targets,
-      publishArguments: publishArguments,
+      publishJobs,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_app_publisher/src/api/app_package_publisher.dart';
+import 'package:flutter_app_publisher/src/publishers/gitee/app_package_publisher_gitee.dart';
 import 'package:flutter_app_publisher/src/publishers/publishers.dart';
 
 class FlutterAppPublisher {
@@ -10,6 +11,7 @@ class FlutterAppPublisher {
     AppPackagePublisherFir(),
     AppPackagePublisherFirebase(),
     AppPackagePublisherFirebaseHosting(),
+    AppPackagePublisherGitee(),
     AppPackagePublisherGithub(),
     AppPackagePublisherPgyer(),
     AppPackagePublisherPlayStore(),

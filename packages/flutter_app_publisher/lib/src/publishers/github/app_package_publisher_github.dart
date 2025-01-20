@@ -96,7 +96,8 @@ class AppPackagePublisherGithub extends AppPackagePublisher {
     Response resp = await _dio.get(
       'https://api.github.com/repos/${publishConfig.repoOwner}/${publishConfig.repoName}/releases?per_page=1',
     );
-    final latest = (resp.data as List).first();
+    print(resp.data);
+    final latest = (resp.data as List).first;
     if (latest['draft']) {
       _updateDraftToPublish(publishConfig, latest);
     }
@@ -104,11 +105,13 @@ class AppPackagePublisherGithub extends AppPackagePublisher {
   }
 
   Future<void> _updateDraftToPublish(
-      PublishGithubConfig pconfig, Map<String, dynamic> draft) async {
-    await _dio.post(
+    PublishGithubConfig pconfig,
+    Map<String, dynamic> draft,
+  ) async {
+    await _dio.patch(
       'https://api.github.com/repos/${pconfig.repoOwner}/${pconfig.repoName}/releases/${draft['id']}',
       data: {
-        draft: false,
+        'draft': false,
       },
     );
   }

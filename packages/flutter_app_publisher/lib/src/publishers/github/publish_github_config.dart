@@ -69,18 +69,18 @@ class PublishGithubConfig extends PublishConfig {
       releaseTitle: publishArguments?['release-title'],
     );
 
-    String appVersion =
-        publishConfig.pubspec.version.toString().split('+').first;
-    String appBuildNumber =
-        publishConfig.pubspec.version.toString().split('+').last;
+    // String appVersion =
+    //     publishConfig.pubspec.version.toString().split('+').first;
+    // String appBuildNumber =
+    //     publishConfig.pubspec.version.toString().split('+').last;
 
-    if ((publishConfig.releaseTitle ?? '').trim().isEmpty) {
-      publishConfig.releaseTitle = 'v$appVersion';
-    } else {
-      publishConfig.releaseTitle = publishConfig.releaseTitle
-          ?.replaceAll('{appVersion}', appVersion)
-          .replaceAll('{appBuildNumber}', appBuildNumber);
-    }
+    // if ((publishConfig.releaseTitle ?? '').trim().isEmpty) {
+    //   publishConfig.releaseTitle = 'v$appVersion';
+    // } else {
+    //   publishConfig.releaseTitle = publishConfig.releaseTitle
+    //       ?.replaceAll('{appVersion}', appVersion)
+    //       .replaceAll('{appBuildNumber}', appBuildNumber);
+    // }
 
     return publishConfig;
   }

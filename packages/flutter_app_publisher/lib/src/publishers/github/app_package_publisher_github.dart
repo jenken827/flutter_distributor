@@ -94,9 +94,10 @@ class AppPackagePublisherGithub extends AppPackagePublisher {
     PublishGithubConfig publishConfig,
   ) async {
     Response resp = await _dio.get(
-      'https://api.github.com/repos/${publishConfig.repoOwner}/${publishConfig.repoName}/releases/latest',
+      'https://api.github.com/repos/${publishConfig.repoOwner}/${publishConfig.repoName}/releases?per_page=1',
     );
-    return resp.data?['upload_url'];
+    final latest = (resp.data as List).first();
+    return latest?['upload_url'];
   }
 
   /// Upload Release Asset

@@ -174,11 +174,51 @@ class FlutterDistributor {
         if (buildResult != null) {
           String buildMode =
               buildArguments.containsKey('profile') ? 'profile' : 'release';
+
+          if (buildArguments['target-platform'] == null &&
+              platform != 'android') {
+            String? arch;
+            if (Platform.isLinux || Platform.isMacOS) {
+              // Get architecture from uname
+              final result = await Process.run('uname', ['-m']);
+              if (result.exitCode == 0) {
+                arch = result.stdout.toString().trim();
+                // Map common architecture names to Flutter's target-platform values
+                switch (arch) {
+                  case 'x86_64':
+                    arch = 'x64';
+                    break;
+                  case 'aarch64':
+                    arch = 'arm64';
+                    break;
+                  case 'armv7l':
+                    arch = 'arm';
+                    break;
+                }
+              }
+            } else if (Platform.isWindows) {
+              // Get architecture from environment variables
+              arch = Platform.environment['PROCESSOR_ARCHITECTURE'];
+              if (arch == 'AMD64') {
+                arch = 'x64';
+              }
+            }
+
+            if (arch != null) {
+              buildArguments['target-platform'] = arch;
+            }
+          } else if (buildArguments['target-platform'] != null) {
+            buildArguments['target-platform'] =
+                (buildArguments['target-platform'] as String)
+                    .replaceAll(RegExp('^.*-'), '');
+          }
+
           Map<String, dynamic>? arguments = {
             'build_mode': buildMode,
             'flavor': buildArguments['flavor'],
             'channel': channel,
             'artifact_name': artifactName,
+            'target_platform': buildArguments['target-platform'],
           };
           MakeResult makeResult = await _packager.package(
             platform,

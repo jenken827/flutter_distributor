@@ -6,9 +6,9 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
 const _kArtifactName =
-    '{{name}}{{#flavor}}-{{flavor}}{{/flavor}}-{{build_name}}{{#is_profile}}-{{build_mode}}{{/is_profile}}-{{platform}}{{#is_installer}}-setup{{/is_installer}}{{#ext}}.{{ext}}{{/ext}}';
+    '{{name}}{{#flavor}}-{{flavor}}{{/flavor}}-{{build_name}}{{#is_profile}}-{{build_mode}}{{/is_profile}}-{{platform}}{{#target_platform}}-{{/target_platform}}{{target_platform}}{{#is_installer}}-setup{{/is_installer}}{{#ext}}.{{ext}}{{/ext}}';
 const _kArtifactNameWithChannel =
-    '{{name}}-{{channel}}-{{build_name}}{{#is_profile}}-{{build_mode}}{{/is_profile}}-{{platform}}{{#is_installer}}-setup{{/is_installer}}{{#ext}}.{{ext}}{{/ext}}';
+    '{{name}}-{{channel}}-{{build_name}}{{#is_profile}}-{{build_mode}}{{/is_profile}}-{{platform}}{{#target_platform}}-{{target_platform}}{{/target_platform}}{{#is_installer}}-setup{{/is_installer}}{{#ext}}.{{ext}}{{/ext}}';
 
 class MakeConfig {
   late bool isInstaller = false;
@@ -18,6 +18,7 @@ class MakeConfig {
   late String platform;
   String? flavor;
   String? channel;
+  late String? targetPlatform;
 
   /// https://mustache.github.io/mustache.5.html
   String? artifactName;
@@ -45,6 +46,7 @@ class MakeConfig {
     channel = makeConfig.channel;
     artifactName = makeConfig.artifactName;
     packageFormat = makeConfig.packageFormat;
+    targetPlatform = makeConfig.targetPlatform;
     outputDirectory = makeConfig.outputDirectory;
     return this;
   }
@@ -73,6 +75,7 @@ class MakeConfig {
       'platform': platform,
       'flavor': flavor,
       'channel': channel,
+      'target_platform': targetPlatform,
       'ext': packageFormat.isEmpty ? null : packageFormat,
     };
 
@@ -134,6 +137,7 @@ class MakeConfig {
       'channel': channel,
       'artifactName': artifactName,
       'packageFormat': packageFormat,
+      'targetPlatform': targetPlatform,
       'outputDirectory': outputDirectory.path,
       'appName': appName,
       'appVersion': appVersion.toString(),
@@ -172,6 +176,7 @@ class DefaultMakeConfigLoader extends MakeConfigLoader {
       ..channel = arguments?['channel']
       ..artifactName = arguments?['artifact_name']
       ..packageFormat = packageFormat
+      ..targetPlatform = arguments?['target_platform']
       ..outputDirectory = outputDirectory;
   }
 }

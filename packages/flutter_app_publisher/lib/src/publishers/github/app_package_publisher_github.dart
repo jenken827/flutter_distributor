@@ -97,7 +97,20 @@ class AppPackagePublisherGithub extends AppPackagePublisher {
       'https://api.github.com/repos/${publishConfig.repoOwner}/${publishConfig.repoName}/releases?per_page=1',
     );
     final latest = (resp.data as List).first();
+    if (latest['draft']) {
+      _updateDraftToPublish(publishConfig, latest);
+    }
     return latest?['upload_url'];
+  }
+
+  Future<void> _updateDraftToPublish(
+      PublishGithubConfig pconfig, Map<String, dynamic> draft) async {
+    await _dio.post(
+      'https://api.github.com/repos/${pconfig.repoOwner}/${pconfig.repoName}/releases/${draft['id']}',
+      data: {
+        draft: false,
+      },
+    );
   }
 
   /// Upload Release Asset

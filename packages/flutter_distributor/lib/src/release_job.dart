@@ -72,7 +72,9 @@ class ReleaseJob {
       name: json['name'],
       package: ReleaseJobPackage.fromJson(json['package']),
       publish: json['publish'] != null
-          ? ReleaseJobPublish.fromJson(json['publish'])
+          ? (json['publish'] as List)
+              .map((p) => ReleaseJobPublish.fromJson(p))
+              .toList()
           : null,
       publishTo: json['publish_to'],
     );
@@ -81,7 +83,7 @@ class ReleaseJob {
   final Map<String, String>? variables;
   final String name;
   final ReleaseJobPackage package;
-  final ReleaseJobPublish? publish;
+  final List<ReleaseJobPublish>? publish;
   final String? publishTo;
 
   Map<String, dynamic> toJson() {
@@ -89,7 +91,7 @@ class ReleaseJob {
       'variables': variables,
       'name': name,
       'package': package.toJson(),
-      'publish': publish?.toJson(),
+      'publish': publish?.map((p) => p.toJson()).toList(),
       'publish_to': publishTo,
     }..removeWhere((key, value) => value == null);
   }

@@ -211,49 +211,22 @@ class FlutterDistributor {
 
   Future<List<PublishResult>> publish(
     FileSystemEntity fileSystemEntity,
-    List<String> targets, {
-    Map<String, dynamic>? publishArguments,
+    List<ReleaseJobPublish> publish, {
     Map<String, String>? variables,
   }) async {
     List<PublishResult> publishResultList = [];
     try {
-      for (String target in targets) {
+      for (ReleaseJobPublish pub in publish) {
         ProgressBar progressBar = ProgressBar(
-          format: 'Publishing to $target: {bar} {value}/{total} {percentage}%',
+          format:
+              'Publishing to ${pub.target}: {bar} {value}/{total} {percentage}%',
         );
-
-        Map<String, dynamic>? newPublishArguments = {};
-
-        if (publishArguments != null) {
-          for (var key in publishArguments.keys) {
-            if (!key.startsWith('$target-')) continue;
-            dynamic value = publishArguments[key];
-
-            if (value is List) {
-              // ignore: prefer_for_elements_to_map_fromiterable
-              value = Map.fromIterable(
-                value,
-                key: (e) => e.split('=')[0],
-                value: (e) => e.split('=')[1],
-              );
-            }
-
-            newPublishArguments.putIfAbsent(
-              key.replaceAll('$target-', ''),
-              () => value,
-            );
-          }
-        }
-
-        if (newPublishArguments.keys.isEmpty) {
-          newPublishArguments = publishArguments;
-        }
 
         PublishResult publishResult = await _publisher.publish(
           fileSystemEntity,
-          target: target,
+          target: pub.target,
           environment: variables ?? globalVariables,
-          publishArguments: newPublishArguments,
+          publishArguments: pub.args,
           onPublishProgress: (sent, total) {
             if (!progressBar.isActive) {
               progressBar.start(total, sent);
@@ -340,14 +313,12 @@ class FlutterDistributor {
           // Clean only once
           needCleanBeforeBuild = false;
 
-          if (job.publish != null || job.publishTo != null) {
-            String? publishTarget = job.publishTo ?? job.publish?.target;
+          if (job.publish != null) {
             MakeResult makeResult = makeResultList.first;
             FileSystemEntity artifact = makeResult.artifacts.first;
             await publish(
               artifact,
-              [publishTarget!],
-              publishArguments: job.publish?.args,
+              job.publish!,
               variables: variables,
             );
           }

@@ -45,7 +45,9 @@ class AppPackagePublisherGitee extends AppPackagePublisher {
       rid = await _getLatestReleaseId(publishConfig);
     } else {
       final gr = await _getGithubLatestReleaseInfo(publishConfig);
-      rid = await _createRelease(publishConfig, gr);
+      rid = await _checkExists(publishConfig, gr?['tag_name']);
+      rid ??= await _createRelease(publishConfig, gr);
+
       if (rid == null) {
         throw PublishError('Failed to create release');
       }
@@ -70,6 +72,16 @@ class AppPackagePublisherGitee extends AppPackagePublisher {
     );
     print(resp.data);
     return resp.data;
+  }
+
+  Future<String?> _checkExists(
+    PublishGiteeConfig pconfig,
+    String tagname,
+  ) async {
+    Response resp = await Dio().get(
+      'https://gitee.com/api/v5/repos/${pconfig.repoOwner}/${pconfig.repoName}/releases/tags/$tagname',
+    );
+    return resp.data['id'];
   }
 
   /// Create release

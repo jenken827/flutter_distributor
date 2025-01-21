@@ -81,7 +81,7 @@ class AppPackagePublisherGitee extends AppPackagePublisher {
     Response resp = await Dio().get(
       'https://gitee.com/api/v5/repos/${pconfig.repoOwner}/${pconfig.repoName}/releases/tags/$tagname',
     );
-    return resp.data['id'];
+    return resp.data?['id'];
   }
 
   /// Create release

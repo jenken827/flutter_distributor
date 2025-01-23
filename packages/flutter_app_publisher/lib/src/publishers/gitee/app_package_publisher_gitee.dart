@@ -78,7 +78,7 @@ class AppPackagePublisherGitee extends AppPackagePublisher {
     PublishGiteeConfig pconfig,
     String tagname,
   ) async {
-    Response resp = await Dio().get(
+    Response resp = await _dio.get(
       'https://gitee.com/api/v5/repos/${pconfig.repoOwner}/${pconfig.repoName}/releases/tags/$tagname',
     );
     return resp.data?['id'];
